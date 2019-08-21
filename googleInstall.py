@@ -16,6 +16,17 @@ def sigmoid(Z):
 def softmax(Z):
 	return np.exp(Z)/np.exp(Z).sum(axis =1, keepdims =True)
 
+def classRate(YP, Y):
+	#classification rate
+	correct = 0
+	for i in range(len(Y)):
+		if(Y[i] == YP[i]):
+			correct = correct+1
+
+	class_rate = correct/len(YP)
+	print("classification rate: {}".format(class_rate))
+
+
 sampleSize = 100
 N = 9
 D = 16
@@ -35,11 +46,5 @@ YP = feedforward(X, W1, B1, W2, B2)
 #finds largest index classification
 YP = np.argmax(YP, axis = 1)
 
-#classification rate
-correct = 0
-for i in range(len(Y)):
-	if(Y[i] == YP[i]):
-		correct = correct+1
-
-class_rate = correct/len(YP)
-print("classification rate: {}".format(class_rate))
+learning_rate = 1e-7
+classRate(YP, Y)
