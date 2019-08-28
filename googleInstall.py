@@ -27,6 +27,9 @@ def classRate(YP, Y):
 	print("classification rate: {}".format(class_rate))
 
 
+rawData = pd.read_csv("googleplaystore.csv")
+print(rawData)
+
 sampleSize = 100
 N = 9
 D = 16
