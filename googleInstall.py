@@ -27,11 +27,13 @@ def classRate(YP, Y):
 	print("classification rate: {}".format(class_rate))
 
 
-rawData = pd.read_csv("googleplaystore.csv")
-print(rawData)
+X = pd.read_csv("googleplaystore.csv")
+Y = X['Installs'].values
+X = X.drop(columns =['Installs',"App"])
+print(X)
 
-sampleSize = 100
-N = 9
+sampleSize = X.shape[0]
+N = X.shape[1]
 D = 16
 M = 8
 
