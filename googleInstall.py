@@ -4,22 +4,31 @@ import pandas as pd
 from math import exp
 from process import get_data
 
+
 #calculates loss
-def loss(T, Y):
-	return -T * np.log(Y)
+def loss(Y, T):
+	return (-T * np.log(Y)).sum()
+
+def gradient_w1(Y, T, W2, Z, X):
+	dZ = (T - Y).dot(W2.T) * Z * (1 - Z)
+	ret2 = X.T.dot(dZ)
+	return ret2
+
+def gradient_b1(Y, T, W2, Z1):
+	return (W2.T.dot(T - Y) * Z1 * (1-Z)).sum(axis = 0)
 
 def gradient_w2(X, Y, T):
-	return X.T.dot(T - Y)
+	return (X.T.dot(T - Y)).sum(axis = 0)
 
 def gradient_b2(Y, T):
-	return np.sum(T - Y)
+	return np.sum(T - Y, axis = 0)
 
 def feedforward(X, W1, B1, W2, B2):
-	Z1 = X.dot(W1) + B1
-	A1 = sigmoid(Z1)
-	Z2 = A1.dot(W2) + B2
-	YP = softmax(Z2)
-	return Z1, Z2, YP
+	A1 = X.dot(W1) + B1
+	Z = sigmoid(A1)
+	A2 = Z.dot(W2) + B2
+	YP = softmax(A2)
+	return Z, YP
 
 def sigmoid(Z):
 	return 1/(1+np.exp(-Z))
@@ -35,7 +44,8 @@ def classRate(YP, Y):
 			correct = correct+1
 
 	class_rate = correct/len(YP)
-	print("classification rate: {}".format(class_rate))
+	return class_rate
+	
 
 
 X, Y, installs = get_data()
@@ -54,13 +64,25 @@ W1 = np.random.randn(N, D)
 B1 = np.random.randn(D)
 W2 = np.random.randn(D, M)
 B2 = np.random.randn(M)
-Z1, Z2, YP = feedforward(X, W1, B1, W2, B2)
 
-#finds largest index classification
-YP = np.argmax(YP, axis = 1)
+for epoch in range(1):
 
-learning_rate = 1e-7
-classRate(YP, Y)
+	Z, YP = feedforward(X, W1, B1, W2, B2)
 
-W2 -= learning_rate * gradient_w2(Z2, YP, Y)
-B2 -= learning_rate * gradient_b2(YP, Y)
+	#finds largest index classification
+	YP = np.argmax(YP, axis = 1)
+	losses = []
+	if(epoch%100 == 0):
+		l = loss(YP, Y)
+		print("classification rate: {}".format(classRate(YP, Y)))
+		print("loss: {}".format(l))
+		losses.append(l)
+
+	learning_rate = 1e-7
+	W2 += learning_rate * gradient_w2(Z, YP, Y)
+	B2 += learning_rate * gradient_b2(YP, Y)
+	W1 += learning_rate * gradient_w1(YP, Y, W2, Z, X)
+	B1 += learning_rate * gradient_b1(YP, Y, W2, Z)
+
+plt.plot(losses)
+plt.show()
