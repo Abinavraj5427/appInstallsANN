@@ -47,10 +47,19 @@ def classRate(YP, Y):
 	return class_rate
 	
 
-
+train_size = .75
 X, Y, installs = get_data()
 
-sampleSize = X.shape[0] #sample size
+#train and test sets created
+X_train = X[:(int)(X.shape[0]*train_size),:]
+X_test = X[(int)(X.shape[0]*train_size):,:]
+Y_train = Y[:(int)(Y.shape[0]*train_size)]
+Y_test = Y[(int)(Y.shape[0]*train_size):]
+
+batchSize = 439
+batchX = np.split(X_train, batchSize, axis = 0)
+batchY = np.split(Y_train, batchSize, axis = 0)
+
 N = X.shape[1] #features
 D = 16 #hidden layers
 M = Y.shape[0] #outputs
@@ -65,20 +74,23 @@ B1 = np.random.randn(D)
 W2 = np.random.randn(D, M)
 B2 = np.random.randn(M)
 
-for epoch in range(1):
-
+for epoch in range(batchSize):
+	# X = batchX[epoch]
+	# Y = batchY[epoch]
 	Z, YP = feedforward(X, W1, B1, W2, B2)
 
 	#finds largest index classification
 	YP = np.argmax(YP, axis = 1)
 	losses = []
-	if(epoch%100 == 0):
+	if(epoch%5 == 0):
 		l = loss(YP, Y)
 		print("classification rate: {}".format(classRate(YP, Y)))
 		print("loss: {}".format(l))
 		losses.append(l)
 
-	learning_rate = 1e-7
+	learning_rate = 1e-7 
+	print(type(gradient_w1(YP, Y, W2, Z, X).shape))
+	print(type(W1))
 	W2 += learning_rate * gradient_w2(Z, YP, Y)
 	B2 += learning_rate * gradient_b2(YP, Y)
 	W1 += learning_rate * gradient_w1(YP, Y, W2, Z, X)
