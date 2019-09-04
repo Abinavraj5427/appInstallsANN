@@ -55,7 +55,7 @@ X_test = X[(int)(X.shape[0]*train_size):,:]
 Y_train = Y[:(int)(Y.shape[0]*train_size)]
 Y_test = Y[(int)(Y.shape[0]*train_size):]
 
-batchSize = 878
+batchSize = 439
 batchX = np.split(X_train, batchSize, axis = 0)
 batchY = np.split(Y_train, batchSize, axis = 0)
 
@@ -75,9 +75,10 @@ W2 = np.random.randn(M, K) #(16, 19)
 B2 = np.random.randn(K) #(19)
 
 losses = []
-for epoch in range(batchSize):
-	X = batchX[epoch]
-	Y = batchY[epoch]
+classifications = []
+for epoch in range(1000000):
+	X = batchX[epoch % len(batchX)]
+	Y = batchY[epoch % len(batchY)]
 
 	Z, YP = feedforward(X, W1, B1, W2, B2)
 
@@ -85,16 +86,21 @@ for epoch in range(batchSize):
 	linear_Y = np.argmax(Y, axis = 1)
 
 	l = loss(YP, Y)
+	r = classRate(linear_YP, linear_Y)
 	losses.append(l)
-	if(epoch%5 == 0):
-		print("classification rate: {}".format(classRate(linear_YP, linear_Y)))
+	classifications.append(r)
+	if(epoch%100 == 0):
+		print("classification rate: {}".format(r))
 		print("loss: {}".format(l))
 
-	learning_rate = 1e-7 
+	learning_rate = 1e-3 
 	W2 += learning_rate * gradient_w2(Z, YP, Y)
 	B2 += learning_rate * gradient_b2(YP, Y)
 	W1 += learning_rate * gradient_w1(YP, Y, W2, Z, X)
 	B1 += learning_rate * gradient_b1(YP, Y, W2, Z)
 
 plt.plot(losses)
+plt.show()
+
+plt.plot(classifications)
 plt.show()
