@@ -51,8 +51,13 @@ def get_data():
         t = categories.tolist().index(X[n,0])
         X2[n,t+D] = 1
 
-    #mapping outputs to indices
-    for n in range(N):
-        Y[n] = installs.tolist().index(Y[n])
+    #number of possible outputs
+    K = installs.shape[0]
 
-    return X2, Y, installs
+    #mapping outputs to indices
+    Y2 = np.zeros((N, K))
+    for n in range(N):
+        t = installs.tolist().index(Y[n])
+        Y2[n, t] = 1
+
+    return X2, Y2, installs

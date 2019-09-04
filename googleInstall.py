@@ -4,18 +4,17 @@ import pandas as pd
 from math import exp
 from process import get_data
 
-
 #calculates loss
 def loss(Y, T):
-	return (-T * np.log(Y)).sum()
+	return (T * np.log(Y)).sum()
 
 def gradient_w1(Y, T, W2, Z, X):
 	dZ = (T - Y).dot(W2.T) * Z * (1 - Z)
 	ret2 = X.T.dot(dZ)
 	return ret2
 
-def gradient_b1(Y, T, W2, Z1):
-	return (W2.T.dot(T - Y) * Z1 * (1-Z)).sum(axis = 0)
+def gradient_b1(Y, T, W2, Z):
+	return ((T - Y).dot(W2.T) * Z * (1-Z)).sum(axis = 0)
 
 def gradient_w2(X, Y, T):
 	return (X.T.dot(T - Y)).sum(axis = 0)
@@ -56,41 +55,42 @@ X_test = X[(int)(X.shape[0]*train_size):,:]
 Y_train = Y[:(int)(Y.shape[0]*train_size)]
 Y_test = Y[(int)(Y.shape[0]*train_size):]
 
-batchSize = 439
+batchSize = 878
 batchX = np.split(X_train, batchSize, axis = 0)
 batchY = np.split(Y_train, batchSize, axis = 0)
 
-N = X.shape[1] #features
-D = 16 #hidden layers
-M = Y.shape[0] #outputs
+
+D = X.shape[1] #features (36)
+M = 16 #hidden layers
+K = Y.shape[1] #outputs
 
 # X = np.random.randn(sampleSize, N)
 # Y = np.random.randn(sampleSize, M)
 # Y = np.argmax(Y, axis = 1)
 
 #forward propogation
-W1 = np.random.randn(N, D)
-B1 = np.random.randn(D)
-W2 = np.random.randn(D, M)
-B2 = np.random.randn(M)
+W1 = np.random.randn(D, M) #(36, 16)
+B1 = np.random.randn(M) #(16)
+W2 = np.random.randn(M, K) #(16, 19)
+B2 = np.random.randn(K) #(19)
 
+losses = []
 for epoch in range(batchSize):
-	# X = batchX[epoch]
-	# Y = batchY[epoch]
+	X = batchX[epoch]
+	Y = batchY[epoch]
+
 	Z, YP = feedforward(X, W1, B1, W2, B2)
 
-	#finds largest index classification
-	YP = np.argmax(YP, axis = 1)
-	losses = []
+	linear_YP = np.argmax(YP, axis = 1)
+	linear_Y = np.argmax(Y, axis = 1)
+
+	l = loss(YP, Y)
+	losses.append(l)
 	if(epoch%5 == 0):
-		l = loss(YP, Y)
-		print("classification rate: {}".format(classRate(YP, Y)))
+		print("classification rate: {}".format(classRate(linear_YP, linear_Y)))
 		print("loss: {}".format(l))
-		losses.append(l)
 
 	learning_rate = 1e-7 
-	print(type(gradient_w1(YP, Y, W2, Z, X).shape))
-	print(type(W1))
 	W2 += learning_rate * gradient_w2(Z, YP, Y)
 	B2 += learning_rate * gradient_b2(YP, Y)
 	W1 += learning_rate * gradient_w1(YP, Y, W2, Z, X)
