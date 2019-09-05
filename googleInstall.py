@@ -55,7 +55,7 @@ X_test = X[(int)(X.shape[0]*train_size):,:]
 Y_train = Y[:(int)(Y.shape[0]*train_size)]
 Y_test = Y[(int)(Y.shape[0]*train_size):]
 
-batchSize = 878
+batchSize = 439
 batchX = np.split(X_train, batchSize, axis = 0)
 batchY = np.split(Y_train, batchSize, axis = 0)
 
